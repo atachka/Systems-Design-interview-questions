@@ -30,6 +30,12 @@ This repository is a collection of system design interview questions and answers
 
 ---
 
+# Resiliency
+
+1. [What is Resiliency?](#1-what-is-resiliency)
+
+---
+
 ## Scalability
 
 ### 1. How can we make our application scalable?
@@ -303,3 +309,29 @@ If we have clients that are distributed all over the world, we need to use CDN b
 Some CDN providers:
 
 ![CDN Providers](/assets/CDN-Providers.png)
+
+---
+
+## Resiliency
+
+### 1. What is Resiliency?
+
+Main goal of Resiliency is to handle and recover from failures gracefully, for example things that can fail:
+
+- A single server
+- An entire rack
+- An entire data center (AKA "availability zone")
+- An entire region
+- ...anything more, and you have bigger problems...
+
+Solution Example: If one region is not responding we will reroute to another one, we have to make sure that the new region has the capacity to handle the access traffic.
+
+![Resiliency Data](/assets/Resiliency-Example.png)
+
+Things to consider before distributing servers:
+
+- Secondaries should be spread across multiple racks, availability zones, and regions.
+- Make sure your system has enough capacity to survive a failure at any reasonable scale(This means overprovisioning).
+- You may need to balance budget vs. availability. Not every system warrants this.
+  - Provisioning a new server from an offsite backup might be good enough.
+  - Again, ask questions!
