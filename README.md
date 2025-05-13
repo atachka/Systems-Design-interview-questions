@@ -21,6 +21,15 @@ This repository is a collection of system design interview questions and answers
 
 ---
 
+# Caching
+
+1. [What is Caching?](#1-what-is-caching)
+2. [How does Caching work?](#1-how-does-caching-work)
+3. [What are Eviction Policies(Strategies) for Caching?](#3-what-are-eviction-policiesstrategies-for-caching)
+4. [What is CDN(Content Distribution Networks)?](#4-what-is-cdncontent-distribution-networks)
+
+---
+
 ## Scalability
 
 ### 1. How can we make our application scalable?
@@ -124,7 +133,7 @@ Sharding improves performance and scalability but adds complexity in terms of da
 
 ### 5. What is Denormalizing Data?
 
-Normalized Data Example: In this example We join the customer table with the reservation table, we get customers with name and phone instead of just their ID in reservations.
+**Normalized Data Example**: In this example We join the customer table with the reservation table, we get customers with name and phone instead of just their ID in reservations.
 
 ![Normalized Data](/assets/Normalized-Data.png)
 
@@ -162,18 +171,19 @@ Denormalized Data Example:
 
 ### 6. What are Data Lakes?
 
-- Another approach is to just throw data into text files (csv, json perhaps) into a big distributed storage system like Amazon S3.
+Another approach is to just throw data into text files (csv, json perhaps) into a big distributed storage system like Amazon S3.
 
-  - This is called a "data lake"
-  - Common approach for "big data" and unstructured data.
+- This is called a "data lake"
+- Common approach for "big data" and unstructured data.
 
-- Another process (i.e., Amazon Glue) creates a schema for that data.
-- And cloud-based features let you query the data.
-  - Amazon Athena (serverless)
-  - Amazon Redshift (distributed data warehouse)
-  - You still need to think about how to partition the raw data for best performance(by date or having different buckets or directories).
+Another process (i.e., Amazon Glue) creates a schema for that data.
+And cloud-based features let you query the data.
 
-In this example AWS Glue monitors the data and structures it to look like a schema,  
+- Amazon Athena (serverless)
+- Amazon Redshift (distributed data warehouse)
+- You still need to think about how to partition the raw data for best performance(by date or having different buckets or directories).
+
+**Example**: In this example AWS Glue monitors the data and structures it to look like a schema,  
 than can be read by Amazon Athena or we could issue a SQL query and treat it like a data warehouse
 
 ![Data Lake Example](/assets/DataLake-Example.png)
@@ -188,7 +198,7 @@ than can be read by Amazon Athena or we could issue a SQL query and treat it lik
 
 **Isolation** : No transaction is affected by any other transaction that is still in progress.
 
-- Example: If we have two different commands running, that are fighting over the same data one  
+- **Example**: If we have two different commands running, that are fighting over the same data one  
   of them's gonna win, while one command is writing out data another command can't modify that data.
 
 **Durability** : Once a transaction is committed, it stays, even if the system crashes immediately after.
@@ -204,3 +214,92 @@ than can be read by Amazon Athena or we could issue a SQL query and treat it lik
 Even though ACID is good sometimes we have to give up something up in the name of scalability (Modern databases usually give up Availability).
 
 ![Cap Theorem](/assets/CAP-Theorem.png)
+
+---
+
+## Caching
+
+### 1. What is Caching?
+
+Caching is the process of storing frequently accessed data in a temporary storage  
+layer to improve performance and reduce the need for repeated computations or database  
+queries. It helps speed up applications by reducing latency and load on backend systems.
+
+**Example 1**: In this example we hit the database (hitting the disk) every time.
+
+![Caching Example1](/assets/Caching-Example1.png)
+
+**Example 2**: In this example we have a caching layer (a fleet of other servers that is sitting  
+alongside our application and their only job is to keep in memory copies of the data that  
+has been going in the database, e.g, most recent hits or the popular ones, another advantage  
+is that we can scale this fleet independently of our application fleet),
+
+![Caching Example2](/assets/Caching-Example2.png)
+
+### 2. How does Caching work?
+
+- Usually horizontally scaled servers are used.
+
+- Clients hash requests to a given server.
+
+  - Clients(Web/Application Servers) will hash a request for a database call to some given  
+    server (apply a mathematical function to the key we are looking for and for a specific  
+    key go to a specific caching host, which will be responsible for that segment of data there)
+
+- In-memory (fast).
+
+- Appropriate for applications with more reads than writes.
+
+- The expiration policy dictates how long data is cached. Too long and your data may go stale; too short and the cache won't do much good.
+
+- Hotspots can be a problem (the "celebrity problem", a situation where certain data  
+  (like popular posts or users) receives a disproportionately high number of requests, causing performance bottlenecks).
+
+- Cold-start is also a problem. How do you initially warm up (put data in) the cache without bringing down whatever you are caching?
+  - One solution is to have a seperate process to warm up the cache before using it.
+
+### 3. What are Eviction Policies(Strategies) for Caching?
+
+Basically it's what cache stays in the cache and what gets removed.
+
+**LRU**: Least Recently Used.
+
+- We evict(remove) the least recently used item from the cache.
+
+**Example**:
+
+In this example when we access something we move it to the head of the Linked List (by doing so we know that item is the most recently used), and the least used item will be at the end automatically to which Tail will point to, if we need to evict something we look at what Tail points to and dispose it.
+
+![LRU Example](/assets/LRU-Example.png)
+
+**LFU**: Least Frequently Used.
+
+- We keep track of how often a given key is it over some period of time, and remove the least hit one.
+
+**FIFO**: First In First Out.
+
+- First thing we put into the cache is the first thing we are going to evict.
+
+A Few Caching Technologies:
+
+![A Few Caching Technologies](/assets/Caching-Technologies.png)
+
+### 4. What is CDN(Content Distribution Networks)?
+
+If we have clients that are distributed all over the world, we need to use CDN because it allows us to distribute the serving of data globally.
+
+- Geographically distributed
+- Local hosting of
+  - HTML
+  - CSS
+  - Javascript
+  - Images
+- Content is hosted on edge locations, which are physically located closer to the end user.
+- Some limited computation may be available as well
+- Mainly useful for static content, such as images or static web pages. You probably won't be asked to design a static web page, though!
+
+![CDN Example](/assets/CDN-Example.png)
+
+Some CDN providers:
+
+![CDN Providers](/assets/CDN-Providers.png)
