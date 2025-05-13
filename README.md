@@ -36,6 +36,13 @@ This repository is a collection of system design interview questions and answers
 
 ---
 
+# Scaling Our Data
+
+1. [What are Distributed Storage Solutions?](#1-what-are-distributed-storage-solutions)
+2. [What is HDFS Architecture?](#2-what-is-hdfs-architecture)
+
+---
+
 ## Scalability
 
 ### 1. How can we make our application scalable?
@@ -335,3 +342,47 @@ Things to consider before distributing servers:
 - You may need to balance budget vs. availability. Not every system warrants this.
   - Provisioning a new server from an offsite backup might be good enough.
   - Again, ask questions!
+
+---
+
+## Scaling Our Data
+
+### 1. What are Distributed Storage Solutions?
+
+Distributed storage solutions are systems that store data across multiple physical  
+machines or locations but make it appear as a single logical storage resource to the user.  
+They Must be **scalable**, **available**, **secure**, **fast object storage** and **highly durable**.
+
+**Use cases**: "data lakes", websites, backups, "big data".
+
+Popular Distributed Storage Solutions:
+
+- Amazon S3
+  - Pay as you go
+  - Different tiers, ie Glacier for archiving is cheaper, but harder to read from. You can also choose the amount of redundancy you need to save money.
+  - [Hot / cool / cold storage](https://aws.amazon.com/s3/storage-classes/)
+- Google Cloud Storage
+- Microsoft Azure
+- Hadoop HDFS
+  - Typically self-hosted
+- Then there are all the consumer-oriented storage solutions
+  - Dropbox, Box, Google Drive, iCloud, OneDrive, etc.
+  - Generally not relevant to system design
+
+### 2. What is HDFS Architecture?
+
+HDFS (Hadoop Distributed File System) is a distributed file system designed to  
+store and manage very large files across multiple machines in a reliable, scalable,  
+and fault-tolerant manner. It is a core component of the Hadoop ecosystem.
+
+**How it Works**:
+
+- Files are broken up into blocks, these blocks of data get replicated in our entire cluster.
+- Replication is rack-aware, every block we have a copy of it somewhere else(not in the same rack).
+- A master "name node" coordinates all operations, it's a node that knows where the blocks of that file are stored and where to get them from.
+  - Client will hit the "name node" and name node will come back and direct the client server to the nearest replica.
+- Clients try to read from nearest replica.
+- Writes get replicated across different racks.
+- For high availability, there may be 3 or more name nodes to falli back on, and a highly available data store for metadata.
+
+![HDFS](/assets/HDFS.png)
